@@ -10,11 +10,11 @@ from fastapi import FastAPI, UploadFile
 app = FastAPI()
 
 @app.get("/")  
-async def root(): 
-    return {"message": "Hello World"} 
+async def geeleed():
+    return '<Geeleed/> สวัสดีครับ นี่คือ api ที่ใช้ไลบรารี่ FastAPI ของ python ในการทำ คุณสามารถดูว่ามี api อะไรให้ใช้บ้างโดยไปที่ /docs '
 
 @app.get("/{id}")  # decorator to define a route for GET method on "/{id}" path
-async def root(id:str):
+async def test(id:str):
     return {"message": f"Hello World {id}"}  # Return a JSON response with the dynamic "id"
 
 
@@ -231,6 +231,7 @@ def compute_histogram(image_np):
         "histogram": hist.tolist()
     }
 
+# วิเคราะห์ histogram ของภาพ
 @app.post('/photo-hist-data')
 async def photoHistData(file: UploadFile):
     image_bytes = await file.read()
