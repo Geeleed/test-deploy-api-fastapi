@@ -213,38 +213,34 @@ async def photoValue(file:UploadFile):
 #             },
 #     }
 
-@app.post('/photo-hist-data')
-async def photoHistData(file: UploadFile):
-    # อ่านไฟล์รูปภาพ
-    image_bytes = await file.read()
-    image_np = np.array(Image.open(BytesIO(image_bytes)))
-
-    # แปลงเป็น grayscale และคำนวณฮิสโตแกรม grayscale
+def compute_histogram(image_np):
     if image_np.shape[-1] == 3:
         image_gray = np.dot(image_np[...,:3], [0.2989, 0.5870, 0.1140])
     else:
         image_gray = image_np
-
-    hist_gray = np.histogram(image_gray, bins=256, range=(0, 256))[0]
-
-    # ค่าเฉลี่ย
-    m_gray = np.mean(hist_gray)
-
-    # ค่าการกระจาย
-    sd_gray = np.std(hist_gray)
-
-    # ค่าความเบ้
-    skew_gray = ((hist_gray - m_gray) ** 3).sum() / (len(hist_gray) * sd_gray ** 3)
-
-    # ค่าความโด่ง
-    kurt_gray = ((hist_gray - m_gray) ** 4).sum() / (len(hist_gray) * sd_gray ** 4)
-
+    hist = np.histogram(image_gray, bins=256, range=(0, 256))[0]
+    mean = np.mean(hist)
+    sd = np.std(hist)
+    skewness = ((hist - mean) ** 3).sum() / (len(hist) * sd ** 3)
+    kurtosis = ((hist - mean) ** 4).sum() / (len(hist) * sd ** 4)
     return {
-        "grayscale":{
-            "mean": m_gray,
-            "sd": sd_gray,
-            "skewness": skew_gray,
-            "kurtosis": kurt_gray,
-            "histogram": hist_gray.tolist()
-        },
+        "mean": mean,
+        "sd": sd,
+        "skewness": skewness,
+        "kurtosis": kurtosis,
+        "histogram": hist.tolist()
     }
+
+@app.post('/photo-hist-data')
+async def photoHistData(file: UploadFile):
+    image_bytes = await file.read()
+    image_np = np.array(Image.open(BytesIO(image_bytes)))
+    
+    result = {
+        "grayscale": compute_histogram(image_np),
+        "red": compute_histogram(image_np[..., 0]),
+        "green": compute_histogram(image_np[..., 1]),
+        "blue": compute_histogram(image_np[..., 2])
+    }
+
+    return result
