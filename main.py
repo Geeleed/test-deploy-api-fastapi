@@ -62,16 +62,16 @@ async def convert_base(number,from_base=10,to_base=16):
 
 # # ขอข้อมูล array ของรูปภาพ
 from io import BytesIO
-# import requests
+import requests
 from PIL import Image
 import numpy as np
-# @app.get('/image2array/{image_url:path}/')
-# async def image2array(image_url:str):
-#     response = requests.get(image_url)
-#     image_data = response.content
-#     image = Image.open(BytesIO(image_data))
-#     image_array = np.asarray(image)
-#     return {"data":image_array.tolist()}
+@app.get('/image2array/{image_url:path}/')
+async def image2array(image_url:str):
+    response = requests.get(image_url)
+    image_data = response.content
+    image = Image.open(BytesIO(image_data))
+    image_array = np.asarray(image)
+    return {"data":image_array.tolist()}
 
 # รับภาพมาคำนวณสัดส่วนแสงสี
 @app.post('/photo-value/')
@@ -126,9 +126,9 @@ async def photoHistData(file: UploadFile):
     return result
 
 # สุ่มตัวเลข
-# @app.get("/random/{min}/{max}/{num}")
-# async def randomNumber(min:float,max:float,num:int):
-#     return np.random.uniform(float(min),float(max),int(num)).tolist()
+@app.get("/random/{min}/{max}/{num}")
+async def randomNumber(min:float,max:float,num:int):
+    return np.random.uniform(float(min),float(max),int(num)).tolist()
 
 # การจัดเรียงแบบ permutation
 # การจัดเรียงแบบ commutation

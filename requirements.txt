@@ -10,7 +10,6 @@ fastapi==0.100.1
 h11==0.14.0
 idna==3.4
 numpy==1.24.4
-opencv-python==4.8.1.78
 Pillow==10.0.1
 pydantic==2.1.1
 pydantic_core==2.4.0
