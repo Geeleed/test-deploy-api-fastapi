@@ -133,81 +133,118 @@ async def photoValue(file:UploadFile):
         "brightness_normalized": brightness_normalized
     }
 
-# คำนวณ histogram ของภาพ
-import cv2
-from scipy.stats import skew, kurtosis
+# อันนี้ lib ใหญ่เกิน vercel ไม่ให้เกิน 250MB
+# # คำนวณ histogram ของภาพ
+# import cv2
+# from scipy.stats import skew, kurtosis
+# @app.post('/photo-hist-data')
+# async def photoHistData(file: UploadFile):
+#     # อ่านไฟล์รูปภาพ
+#     image_bytes = await file.read()
+#     image_np = np.array(Image.open(BytesIO(image_bytes)))
+
+#     # คำนวณฮิสโตแกรมสีแยกตามช่วง canal (R, G, และ B)
+#     hist_red = cv2.calcHist([image_np], [0], None, [256], [0, 256])
+#     hist_green = cv2.calcHist([image_np], [1], None, [256], [0, 256])
+#     hist_blue = cv2.calcHist([image_np], [2], None, [256], [0, 256])
+
+#     # แปลงเป็น grayscale และคำนวณฮิสโตแกรม grayscale
+#     image_gray = cv2.cvtColor(image_np, cv2.COLOR_BGR2GRAY)
+#     hist_gray = cv2.calcHist([image_gray], [0], None, [256], [0, 256])
+
+#     # แปลงข้อมูลฮิสโตแกรมให้อยู่ในรูปแบบ NumPy array
+#     hist_data_red = np.squeeze(hist_red).astype(int)
+#     hist_data_green = np.squeeze(hist_green).astype(int)
+#     hist_data_blue = np.squeeze(hist_blue).astype(int)
+#     hist_data_gray = np.squeeze(hist_gray).astype(int)
+
+#     # ค่าเฉลี่ย
+#     m_red = np.mean(hist_data_red)
+#     m_green = np.mean(hist_data_green)
+#     m_blue = np.mean(hist_data_blue)
+#     m_gray = np.mean(hist_data_gray)
+
+#     # ค่าการกระจาย
+#     sd_red = np.std(hist_data_red)
+#     sd_green = np.std(hist_data_green)
+#     sd_blue = np.std(hist_data_blue)
+#     sd_gray = np.std(hist_data_gray)
+
+#     # ค่าความเบ้
+#     skew_red = skew(hist_data_red)
+#     skew_green = skew(hist_data_green)
+#     skew_blue = skew(hist_data_blue)
+#     skew_gray = skew(hist_data_gray)
+
+#     # ค่าความโด่ง
+#     kurt_red = kurtosis(hist_data_red)
+#     kurt_green = kurtosis(hist_data_green)
+#     kurt_blue = kurtosis(hist_data_blue)
+#     kurt_gray = kurtosis(hist_data_gray)
+
+#     return {
+#         "red":{
+#             "mean": m_red,
+#             "sd": sd_red,
+#             "skewness": skew_red,
+#             "kurtosis":kurt_red,
+#             "histogram":hist_data_red.tolist()
+#             },
+#         "green":{
+#             "mean": m_green,
+#             "sd": sd_green,
+#             "skewness": skew_green,
+#             "kurtosis":kurt_green,
+#             "histogram":hist_data_green.tolist()
+#             },
+#         "blue":{
+#             "mean": m_blue,
+#             "sd": sd_blue,
+#             "skewness": skew_blue,
+#             "kurtosis":kurt_blue,
+#             "histogram":hist_data_blue.tolist()
+#             },
+#         "grayscale":{
+#             "mean": m_gray,
+#             "sd": sd_gray,
+#             "skewness": skew_gray,
+#             "kurtosis":kurt_gray,
+#             "histogram":hist_data_gray.tolist()
+#             },
+#     }
+
 @app.post('/photo-hist-data')
 async def photoHistData(file: UploadFile):
     # อ่านไฟล์รูปภาพ
     image_bytes = await file.read()
     image_np = np.array(Image.open(BytesIO(image_bytes)))
 
-    # คำนวณฮิสโตแกรมสีแยกตามช่วง canal (R, G, และ B)
-    hist_red = cv2.calcHist([image_np], [0], None, [256], [0, 256])
-    hist_green = cv2.calcHist([image_np], [1], None, [256], [0, 256])
-    hist_blue = cv2.calcHist([image_np], [2], None, [256], [0, 256])
-
     # แปลงเป็น grayscale และคำนวณฮิสโตแกรม grayscale
-    image_gray = cv2.cvtColor(image_np, cv2.COLOR_BGR2GRAY)
-    hist_gray = cv2.calcHist([image_gray], [0], None, [256], [0, 256])
+    if image_np.shape[-1] == 3:
+        image_gray = np.dot(image_np[...,:3], [0.2989, 0.5870, 0.1140])
+    else:
+        image_gray = image_np
 
-    # แปลงข้อมูลฮิสโตแกรมให้อยู่ในรูปแบบ NumPy array
-    hist_data_red = np.squeeze(hist_red).astype(int)
-    hist_data_green = np.squeeze(hist_green).astype(int)
-    hist_data_blue = np.squeeze(hist_blue).astype(int)
-    hist_data_gray = np.squeeze(hist_gray).astype(int)
+    hist_gray = np.histogram(image_gray, bins=256, range=(0, 256))[0]
 
     # ค่าเฉลี่ย
-    m_red = np.mean(hist_data_red)
-    m_green = np.mean(hist_data_green)
-    m_blue = np.mean(hist_data_blue)
-    m_gray = np.mean(hist_data_gray)
+    m_gray = np.mean(hist_gray)
 
     # ค่าการกระจาย
-    sd_red = np.std(hist_data_red)
-    sd_green = np.std(hist_data_green)
-    sd_blue = np.std(hist_data_blue)
-    sd_gray = np.std(hist_data_gray)
+    sd_gray = np.std(hist_gray)
 
     # ค่าความเบ้
-    skew_red = skew(hist_data_red)
-    skew_green = skew(hist_data_green)
-    skew_blue = skew(hist_data_blue)
-    skew_gray = skew(hist_data_gray)
+    skew_gray = ((hist_gray - m_gray) ** 3).sum() / (len(hist_gray) * sd_gray ** 3)
 
     # ค่าความโด่ง
-    kurt_red = kurtosis(hist_data_red)
-    kurt_green = kurtosis(hist_data_green)
-    kurt_blue = kurtosis(hist_data_blue)
-    kurt_gray = kurtosis(hist_data_gray)
+    kurt_gray = ((hist_gray - m_gray) ** 4).sum() / (len(hist_gray) * sd_gray ** 4)
 
     return {
-        "red":{
-            "mean": m_red,
-            "sd": sd_red,
-            "skewness": skew_red,
-            "kurtosis":kurt_red,
-            "histogram":hist_data_red.tolist()
-            },
-        "green":{
-            "mean": m_green,
-            "sd": sd_green,
-            "skewness": skew_green,
-            "kurtosis":kurt_green,
-            "histogram":hist_data_green.tolist()
-            },
-        "blue":{
-            "mean": m_blue,
-            "sd": sd_blue,
-            "skewness": skew_blue,
-            "kurtosis":kurt_blue,
-            "histogram":hist_data_blue.tolist()
-            },
         "grayscale":{
             "mean": m_gray,
             "sd": sd_gray,
             "skewness": skew_gray,
-            "kurtosis":kurt_gray,
-            "histogram":hist_data_gray.tolist()
-            },
+            "kurtosis": kurt_gray,
+            "histogram": hist_gray.tolist()
+        },
     }
