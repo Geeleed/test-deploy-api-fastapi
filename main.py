@@ -13,7 +13,7 @@ app = FastAPI()
 async def geeleed():
     return '<Geeleed/> สวัสดีครับ นี่คือ api ที่ใช้ไลบรารี่ FastAPI ของ python ในการทำ คุณสามารถดูว่ามี api อะไรให้ใช้บ้างโดยไปที่ /docs '
 
-@app.get("/{id}")  # decorator to define a route for GET method on "/{id}" path
+@app.get("/{id}/")  # decorator to define a route for GET method on "/{id}" path
 async def test(id:str):
     return {"message": f"Hello World {id}"}  # Return a JSON response with the dynamic "id"
 
@@ -56,7 +56,7 @@ async def test(id:str):
 
 # api เข้ารหัสข้อความ sha256
 import hashlib
-@app.get('/sha256/{text}')
+@app.get('/sha256/{text}/')
 async def sha256(text:str):
     inst = hashlib.sha256()
     inst.update(text.encode('utf-8'))
@@ -65,7 +65,7 @@ async def sha256(text:str):
     return hash_hex
 
 # api แปลงเลขฐาน
-@app.get('/convert_base/{number}/{from_base}/{to_base}')
+@app.get('/convert_base/{number}/{from_base}/{to_base}/')
 async def convert_base(number,from_base=10,to_base=16):
     keyValue = {
         '0':'0',
@@ -106,7 +106,7 @@ from io import BytesIO
 import requests
 from PIL import Image
 import numpy as np
-@app.get('/image2array/{image_url:path}')
+@app.get('/image2array/{image_url:path}/')
 async def image2array(image_url:str):
     response = requests.get(image_url)
     image_data = response.content
@@ -115,7 +115,7 @@ async def image2array(image_url:str):
     return {"data":image_array.tolist()}
 
 # รับภาพมาคำนวณสัดส่วนแสงสี
-@app.post('/photo-value')
+@app.post('/photo-value/')
 async def photoValue(file:UploadFile):
     image_data = await file.read()
     img = Image.open(BytesIO(image_data))
@@ -232,7 +232,7 @@ def compute_histogram(image_np):
     }
 
 # วิเคราะห์ histogram ของภาพ
-@app.post('/photo-hist-data')
+@app.post('/photo-hist-data/')
 async def photoHistData(file: UploadFile):
     image_bytes = await file.read()
     image_np = np.array(Image.open(BytesIO(image_bytes)))
@@ -245,3 +245,11 @@ async def photoHistData(file: UploadFile):
     }
 
     return result
+
+# สุ่มตัวเลข
+@app.get("/random/{min}/{max}/{num}")
+async def randomNumber(min:float,max:float,num:int):
+    return np.random.uniform(float(min),float(max),int(num)).tolist()
+
+# การจัดเรียงแบบ permutation
+# การจัดเรียงแบบ commutation
