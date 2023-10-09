@@ -22,7 +22,7 @@ async def download_image(image_url: str):
     # ตรวจสอบว่าการดาวน์โหลดเสร็จสิ้นและสำเร็จ
     if response.status_code == 200:
         # สร้างไฟล์ชั่วคราวเพื่อเก็บข้อมูลรูปภาพ
-        with tempfile.NamedTemporaryFile(delete=False) as temp_file:
+        with tempfile.NamedTemporaryFile(delete=True) as temp_file:
             for chunk in response.iter_content(chunk_size=128):
                 temp_file.write(chunk)
         
