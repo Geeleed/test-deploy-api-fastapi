@@ -1,8 +1,8 @@
 from fastapi import FastAPI
 # from starlette.responses import StreamingResponse
-from starlette.responses import FileResponse
-import requests
-import tempfile
+# from starlette.responses import FileResponse
+# import requests
+# import tempfile
 
 app = FastAPI()
 
@@ -13,6 +13,7 @@ async def root():
 @app.get("/{id}")  # decorator to define a route for GET method on "/{id}" path
 async def root(id:str):
     return {"message": f"Hello World {id}"}  # Return a JSON response with the dynamic "id"
+
 
 # # API ดาวน์โหลดรูปภาพจาก URL
 # @app.get("/download/{image_url:path}")
@@ -29,28 +30,36 @@ async def root(id:str):
 #         # หากไม่สามารถดาวน์โหลดรูปภาพได้
 #         return {"error": "Unable to download image"}
 
-
-app = FastAPI()
-
-# API ดาวน์โหลดรูปภาพจาก URL
-@app.get("/download/{image_url:path}")
-async def download_image(image_url: str):
-    # ดาวน์โหลดรูปภาพจาก URL
-    response = requests.get(image_url, stream=True)
+# # API ดาวน์โหลดรูปภาพจาก URL
+# @app.get("/download/{image_url:path}")
+# async def download_image(image_url: str):
+#     # ดาวน์โหลดรูปภาพจาก URL
+#     response = requests.get(image_url, stream=True)
     
-    # ตรวจสอบว่าการดาวน์โหลดเสร็จสิ้นและสำเร็จ
-    if response.status_code == 200:
-        # สร้างไฟล์ชั่วคราวเพื่อเก็บข้อมูลรูปภาพ
-        with tempfile.NamedTemporaryFile(delete=False) as temp_file:
-            for chunk in response.iter_content(chunk_size=128):
-                temp_file.write(chunk)
+#     # ตรวจสอบว่าการดาวน์โหลดเสร็จสิ้นและสำเร็จ
+#     if response.status_code == 200:
+#         # สร้างไฟล์ชั่วคราวเพื่อเก็บข้อมูลรูปภาพ
+#         with tempfile.NamedTemporaryFile(delete=False) as temp_file:
+#             for chunk in response.iter_content(chunk_size=128):
+#                 temp_file.write(chunk)
         
-        # สร้างการตอบสนอง FileResponse โดยระบุชื่อไฟล์ที่ต้องการให้ผู้ใช้ดาวน์โหลด
-        file_name = "downloaded_image.jpg"  # ระบุชื่อไฟล์ที่ต้องการให้ผู้ใช้ดาวน์โหลด
-        return FileResponse(temp_file.name, headers={"Content-Disposition": f"attachment; filename={file_name}"})
-    else:
-        # หากไม่สามารถดาวน์โหลดรูปภาพได้
-        return {"error": "Unable to download image"}
+#         # สร้างการตอบสนอง FileResponse โดยระบุชื่อไฟล์ที่ต้องการให้ผู้ใช้ดาวน์โหลด
+#         file_name = "downloaded_image.jpg"  # ระบุชื่อไฟล์ที่ต้องการให้ผู้ใช้ดาวน์โหลด
+#         return FileResponse(temp_file.name, headers={"Content-Disposition": f"attachment; filename={file_name}"})
+#     else:
+#         # หากไม่สามารถดาวน์โหลดรูปภาพได้
+#         return {"error": "Unable to download image"}
+
+
+# api เข้ารหัสข้อความ sha256
+import hashlib
+@app.get('/sha256/{text}')
+async def sha256(text:str):
+    inst = hashlib.sha256()
+    inst.update(text.encode('utf-8'))
+    hash_binary = inst.digest()
+    hash_hex = hash_binary.hex()
+    return hash_hex
 
 
 # uvicorn api:app --port 8001 --reload
