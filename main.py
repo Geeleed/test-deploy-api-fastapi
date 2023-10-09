@@ -126,9 +126,9 @@ async def photoHistData(file: UploadFile):
     return result
 
 # สุ่มตัวเลข
-@app.get("/random/{min}/{max}/{num}")
-async def randomNumber(min:float,max:float,num:int):
-    return np.random.uniform(float(min),float(max),int(num)).tolist()
+# @app.get("/random/{min}/{max}/{num}")
+# async def randomNumber(min:float,max:float,num:int):
+#     return np.random.uniform(float(min),float(max),int(num)).tolist()
 
 # การจัดเรียงแบบ permutation
 # การจัดเรียงแบบ commutation
